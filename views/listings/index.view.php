@@ -1,6 +1,5 @@
 <?php loadPartial('head'); ?>
 <?php loadPartial('navbar'); ?>
-<?php loadPartial('hero-search'); ?>
 <?php loadPartial('top-banner'); ?>
 
 <!-- Job Listings -->
