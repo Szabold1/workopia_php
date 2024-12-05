@@ -1,5 +1,7 @@
 <?php
 require '../helpers.php';
+require basePath('vendor/autoload.php');
+require basePath('Database.php');
 
 // instantiate the router
 require basePath('Router.php');
