@@ -10,7 +10,9 @@ $router = new Router();
 // require the routes
 require basePath('routes.php');
 
-// get request URI and method, and route to the appropriate controller
-$uri = $_SERVER['REQUEST_URI'];
+// get request URI and method
+$uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 $method = $_SERVER['REQUEST_METHOD'];
+
+// route to the appropriate controller
 $router->route($method, $uri);
