@@ -1,5 +1,7 @@
 <?php
 
+namespace Framework;
+
 class Router
 {
     private $routes = [];
@@ -34,8 +36,8 @@ class Router
 
     /**
      * Handle a GET request
-     * @param mixed $uri
-     * @param mixed $controller
+     * @param string $uri
+     * @param string $controller
      * @return void
      */
     public function get($uri, $controller)
@@ -45,8 +47,8 @@ class Router
 
     /**
      * Handle a POST request
-     * @param mixed $uri
-     * @param mixed $controller
+     * @param string $uri
+     * @param string $controller
      * @return void
      */
     public function post($uri, $controller)
@@ -56,8 +58,8 @@ class Router
 
     /**
      * Handle a PUT request
-     * @param mixed $uri
-     * @param mixed $controller
+     * @param string $uri
+     * @param string $controller
      * @return void
      */
     public function put($uri, $controller)
@@ -67,8 +69,8 @@ class Router
 
     /**
      * Handle a DELETE request
-     * @param mixed $uri
-     * @param mixed $controller
+     * @param string $uri
+     * @param string $controller
      * @return void
      */
     public function delete($uri, $controller)

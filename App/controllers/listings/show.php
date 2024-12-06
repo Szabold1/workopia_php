@@ -1,5 +1,8 @@
 <?php
 $config = require basePath('config/db.php');
+
+use Framework\Database;
+
 $db = new Database($config);
 
 $id = $_GET['id'] ?? '';
