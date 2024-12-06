@@ -2,6 +2,8 @@
 
 namespace Framework;
 
+use App\Controllers\ErrorController;
+
 class Router
 {
     private $routes = [];
@@ -10,28 +12,20 @@ class Router
      * Register a route (add it to the routes array)
      * @param string $method
      * @param string $uri
-     * @param string $controller
+     * @param string $action
      * @return void
      */
-    private function registerRoute($method, $uri, $controller)
+    private function registerRoute($method, $uri, $action)
     {
+        // split the controller and method (e.g. 'HomeController@index')
+        [$controller, $controllerMethod] = explode('@', $action);
+
         $this->routes[] = [
             'method' => $method,
             'uri' => $uri,
-            'controller' => $controller
+            'controller' => $controller,
+            'controllerMethod' => $controllerMethod
         ];
-    }
-
-    /**
-     * Load error view and exit
-     * @param int $httpCode
-     * @return void
-     */
-    private function error($httpCode)
-    {
-        http_response_code($httpCode);
-        loadView("error/{$httpCode}");
-        exit;
     }
 
     /**
@@ -87,13 +81,20 @@ class Router
     public function route($method, $uri)
     {
         foreach ($this->routes as $route) {
-            // if the method and URI match, require the controller and return
+            // if the method and URI match (e.g. GET /)
             if ($route['method'] === $method && $route['uri'] === $uri) {
-                require basePath("App/" . $route['controller']);
+                // extract the controller and $method (e.g. 'HomeController@index')
+                $controller = "App\\Controllers\\" . $route['controller'];
+                $controllerMethod = $route['controllerMethod'];
+
+                // instantiate the controller and call the method
+                $contr = new $controller(); // e.g. new HomeController()
+                $contr->$controllerMethod(); // e.g. HomeController->index()
+
                 return;
             }
         }
 
-        $this->error(404);
+        ErrorController::notFound();
     }
 };
