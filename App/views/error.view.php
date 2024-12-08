@@ -7,6 +7,9 @@
         <p class="text-center text-2xl mb-4">
             <?= $message ?>
         </p>
+        <a href="/" class="block text-xl text-center hover:underline text-blue-500">
+            Back To Home
+        </a>
     </div>
 </section>
 

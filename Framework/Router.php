@@ -78,20 +78,52 @@ class Router
      * @param string $method
      * @return void
      */
-    public function route($method, $uri)
+    public function route($uri)
     {
+        // get the request method
+        $requestMethod = $_SERVER['REQUEST_METHOD'];
+
+        // split the URI into parts by slashes
+        $uriParts = explode('/', trim($uri, '/'));
+
         foreach ($this->routes as $route) {
-            // if the method and URI match (e.g. GET /)
-            if ($route['method'] === $method && $route['uri'] === $uri) {
-                // extract the controller and $method (e.g. 'HomeController@index')
-                $controller = "App\\Controllers\\" . $route['controller'];
-                $controllerMethod = $route['controllerMethod'];
+            // split the route URI into parts by slashes
+            $routeParts = explode('/', trim($route['uri'], '/'));
 
-                // instantiate the controller and call the method
-                $contr = new $controller(); // e.g. new HomeController()
-                $contr->$controllerMethod(); // e.g. HomeController->index()
+            // check if method and number of parts match
+            if (
+                strtoupper($route['method']) === strtoupper($requestMethod)
+                && count($routeParts) === count($uriParts)
+            ) {
+                $params = [];
+                $match = true;
+                $regExp = '/\{(.+?)\}/'; // any word between curly braces
 
-                return;
+                for ($i = 0; $i < count($routeParts); $i++) {
+                    // if the parts don't match and the part is not a parameter
+                    if ($routeParts[$i] !== $uriParts[$i] && !preg_match($regExp, $routeParts[$i])) {
+                        $match = false;
+                        break;
+                    }
+
+                    // if the part is a parameter, add it to the params array
+                    if (preg_match($regExp, $routeParts[$i], $matches)) {
+                        $match = true;
+                        $params[$matches[1]] = $uriParts[$i]; // e.g. ['id' => 1]
+                    }
+                }
+
+                if ($match) {
+                    // extract the controller and $method (e.g. 'HomeController@index')
+                    $controller = "App\\Controllers\\" . $route['controller'];
+                    $controllerMethod = $route['controllerMethod'];
+
+                    // instantiate the controller and call the method
+                    $contr = new $controller(); // e.g. new HomeController()
+                    $contr->$controllerMethod($params); // e.g. HomeController->index() or ListingController->show(['id' => 1])
+
+                    return;
+                }
             }
         }
 
