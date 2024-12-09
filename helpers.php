@@ -2,7 +2,6 @@
 
 /**
  * Get the base path
- * 
  * @param string $path
  * @return string
  */
@@ -13,7 +12,6 @@ function basePath($path = '')
 
 /**
  * Load a view
- * 
  * @param string $name
  * @param array $data
  * @return void
@@ -32,7 +30,6 @@ function loadView($name, $data = [])
 
 /**
  * Load a partial
- * 
  * @param string $name
  * @return void
  */
@@ -49,7 +46,6 @@ function loadPartial($name)
 
 /**
  * Inspect a value(s)
- * 
  * @return mixed $value
  * @return void
  */
@@ -62,7 +58,6 @@ function inspect($value)
 
 /**
  * Inspect a value(s) and die
- * 
  * @return mixed $value
  * @return void
  */
@@ -82,4 +77,25 @@ function inspectAndDie($value)
 function formatSalary($salary)
 {
     return '$' . number_format(floatval($salary), 0);
+}
+
+/**
+ * Sanitize data
+ * @param string $dirty
+ * @return string
+ */
+function sanitize($dirty)
+{
+    return filter_var(trim($dirty), FILTER_SANITIZE_SPECIAL_CHARS);
+}
+
+/**
+ * Redirect to a given url
+ * @param string $url
+ * @return void
+ */
+function redirect($url)
+{
+    header("Location: {$url}");
+    exit();
 }
