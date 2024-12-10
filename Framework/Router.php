@@ -83,6 +83,11 @@ class Router
         // get the request method
         $requestMethod = $_SERVER['REQUEST_METHOD'];
 
+        // handle PUT and DELETE requests
+        if ($requestMethod === 'POST' && isset($_POST['_method'])) {
+            $requestMethod = strtoupper($_POST['_method']);
+        }
+
         // split the URI into parts by slashes
         $uriParts = explode('/', trim($uri, '/'));
 
