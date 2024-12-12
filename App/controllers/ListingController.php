@@ -24,8 +24,7 @@ class ListingController
      */
     public function index()
     {
-        $stmt = $this->db->query('SELECT * FROM listings');
-        $listings = $stmt->fetchAll();
+        $listings = $this->db->query('SELECT * FROM listings ORDER BY created_at DESC')->fetchAll();
 
         loadView('/listings/index', ['listings' => $listings]);
     }
