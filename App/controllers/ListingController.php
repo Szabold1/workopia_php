@@ -240,4 +240,32 @@ class ListingController
 
         redirect("/listings/{$id}");
     }
+
+    /**
+     * Search for listings by keywords and location
+     * @return void
+     */
+    public function search()
+    {
+        $keywords = $_GET['keywords'] ? trim($_GET['keywords']) : '';
+        $location = $_GET['location'] ? trim($_GET['location']) : '';
+
+        $queryParams = [
+            'keywords' => "%{$keywords}%",
+            'location' => "%{$location}%"
+        ];
+        $query = "SELECT * FROM listings WHERE (title LIKE :keywords OR description LIKE :keywords OR tags LIKE :keywords OR company LIKE :keywords) AND (city LIKE :location OR state LIKE :location) ORDER BY created_at DESC";
+
+        $listings = $this->db->query($query, $queryParams)->fetchAll();
+
+        if (empty($listings)) {
+            ErrorController::notFound('No listings found');
+            exit;
+        }
+
+        loadView('listings/index', [
+            'listings' => $listings,
+            'search' => true
+        ]);
+    }
 }
