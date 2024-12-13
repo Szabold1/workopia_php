@@ -2,7 +2,9 @@
 
 namespace App\Controllers;
 
+use Framework\Authorization;
 use Framework\Database;
+use Framework\Session;
 use Framework\Validation;
 
 class ListingController
@@ -70,7 +72,7 @@ class ListingController
         $newListingData = array_map('sanitize', $newListingData);
 
         // add user_id to new listing data
-        $newListingData['user_id'] = 1;
+        $newListingData['user_id'] = Session::get('user')['id'];
 
         // check for required fields
         $errors = [];
@@ -82,33 +84,36 @@ class ListingController
         }
 
         // if there was an error, reload the form with the error message(s)
-        // otherwise, save the listing to the database
         if (!empty($errors)) {
             loadView('listings/create', [
                 'errors' => $errors,
                 'listing' => $newListingData
             ]);
-        } else {
-            $fields = [];
-            $paramNames = [];
-
-            foreach ($newListingData as $field => $value) {
-                $fields[] = $field;
-                if (empty($value)) {
-                    $newListingData[$field] = null;
-                }
-                $paramNames[] = ":{$field}";
-            }
-
-            $fields = implode(', ', $fields);
-            $paramNames = implode(', ', $paramNames);
-
-            $sql = "INSERT INTO listings ({$fields}) VALUES ({$paramNames})";
-            $queryParams = $newListingData;
-            $this->db->query($sql, $queryParams);
-
-            redirect('/listings');
+            exit;
         }
+
+        // save the listing to the database
+        $fields = [];
+        $paramNames = [];
+
+        foreach ($newListingData as $field => $value) {
+            $fields[] = $field;
+            if (empty($value)) {
+                $newListingData[$field] = null;
+            }
+            $paramNames[] = ":{$field}";
+        }
+
+        $fields = implode(', ', $fields);
+        $paramNames = implode(', ', $paramNames);
+
+        $sql = "INSERT INTO listings ({$fields}) VALUES ({$paramNames})";
+        $queryParams = $newListingData;
+        $this->db->query($sql, $queryParams);
+
+        Session::setFlashMessage('success', 'Listing created successfully');
+
+        redirect('/listings');
     }
 
     /**
@@ -124,15 +129,20 @@ class ListingController
 
         // check if listing exists
         $listing = $this->db->query("SELECT * FROM listings WHERE id = :id", $queryParams)->fetch();
-
         if (!$listing) {
             ErrorController::notFound('Listing not found');
             return;
         }
 
+        // check if user is authorized to delete this listing
+        if (!Authorization::ownsListing($listing->user_id)) {
+            Session::setFlashMessage('error', 'You are not authorized to delete this listing');
+            redirect("/listings/{$id}");
+        }
+
         $this->db->query("DELETE FROM listings WHERE id = :id", $queryParams);
 
-        $_SESSION['success_message'] = 'Listing deleted successfully';
+        Session::setFlashMessage('success', 'Listing deleted successfully');
 
         redirect('/listings');
     }
@@ -155,6 +165,12 @@ class ListingController
             return;
         }
 
+        // check if user is authorized to edit this listing
+        if (!Authorization::ownsListing($listing->user_id)) {
+            Session::setFlashMessage('error', 'You are not authorized to edit this listing');
+            redirect("/listings/{$id}");
+        }
+
         loadView('listings/edit', ['listing' => $listing]);
     }
 
@@ -168,11 +184,18 @@ class ListingController
         $id = $params['id'] ?? '';
 
         $queryParams = ['id' => $id];
-        $listing = $this->db->query("SELECT * FROM listings WHERE id = :id", $queryParams)->fetch();
 
+        // check if listing exists
+        $listing = $this->db->query("SELECT * FROM listings WHERE id = :id", $queryParams)->fetch();
         if (!$listing) {
             ErrorController::notFound('Listing not found');
             return;
+        }
+
+        // check if user is authorized to edit this listing
+        if (!Authorization::ownsListing($listing->user_id)) {
+            Session::setFlashMessage('error', 'You are not authorized to edit this listing');
+            redirect("/listings/{$id}");
         }
 
         // check only allowed fields are submitted and sanitize data
@@ -189,32 +212,32 @@ class ListingController
         }
 
         // if there was an error, reload the form with the error message(s)
-        // otherwise, save the listing to the database
         if (!empty($errors)) {
             loadView('listings/edit', [
                 'errors' => $errors,
                 'listing' => $listing
             ]);
-        } else {
-            $fieldsToUpdate = [];
-
-            foreach ($updatedData as $field => $value) {
-                $fieldsToUpdate[] = "{$field} = :{$field}";
-                if (empty($value)) {
-                    $updatedData[$field] = null;
-                }
-            }
-
-            $updatedData['id'] = $id;
-
-            $fieldsToUpdate = implode(', ', $fieldsToUpdate);
-
-            $sql = "UPDATE listings SET {$fieldsToUpdate} WHERE id = :id";
-            $this->db->query($sql, $updatedData);
-
-            $_SESSION['success_message'] = 'Listing updated successfully';
-
-            redirect("/listings/{$id}");
         }
+
+        // save the updated listing to the database
+        $fieldsToUpdate = [];
+
+        foreach ($updatedData as $field => $value) {
+            $fieldsToUpdate[] = "{$field} = :{$field}";
+            if (empty($value)) {
+                $updatedData[$field] = null;
+            }
+        }
+
+        $updatedData['id'] = $id;
+
+        $fieldsToUpdate = implode(', ', $fieldsToUpdate);
+
+        $sql = "UPDATE listings SET {$fieldsToUpdate} WHERE id = :id";
+        $this->db->query($sql, $updatedData);
+
+        Session::setFlashMessage('success', 'Listing updated successfully');
+
+        redirect("/listings/{$id}");
     }
 }
