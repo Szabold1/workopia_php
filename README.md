@@ -4,7 +4,7 @@ This is a small job listing project developed as part of [Brad Traversy's PHP co
 
 ---
 
-## Features
+## ✨ Features
 
 - Organized file structure for scalability and maintainability.
 - Separation of concerns: controllers, views, and utility functions.
@@ -13,7 +13,7 @@ This is a small job listing project developed as part of [Brad Traversy's PHP co
 
 ---
 
-## Project Structure
+## 📂 Project Structure
 
 ### **Public Folder**
 
@@ -28,7 +28,7 @@ Contains core application logic:
 
 - **Controllers**: contains classes with methods invoked via routing.
 - **Views**: handles rendering content for the user.
-- (Optional) **Models**: not included in this project but can be added to manage database interactions.
+- **Models** (optional): not included in this project but can be added to manage database interactions.
 
 ### **Framework Folder**
 
@@ -53,7 +53,7 @@ Contains configuration files, such as:
 
 ---
 
-## Key Takeaways
+## 📘 Key Takeaways
 
 - Learned how to structure a project using vanilla PHP.
 - Built a clear file organization system for scalability and ease of development.
